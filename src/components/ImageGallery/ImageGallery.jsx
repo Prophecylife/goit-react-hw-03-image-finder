@@ -5,7 +5,7 @@ import s from './ImageGallery.module.css';
 import Searchbar from 'components/Searchbar/Searchbar';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 import Modal from 'components/Modal/Modal';
-import { Bars } from 'react-loader-spinner';
+import Loader from 'components/Loader/Loader';
 
 export class ImageGallery extends Component {
   state = {
@@ -16,12 +16,12 @@ export class ImageGallery extends Component {
     showModal: false,
     largeImageURL: '',
     tags: '',
+    isLoading: false,
   };
 
   componentDidMount() {
     const { page, query } = this.state;
     query !== '' && this.getImages(page, query);
-    console.log('did mount');
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -36,16 +36,19 @@ export class ImageGallery extends Component {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
-  getImages = (query, page) => {
-    ImageService.getImages(page, query).then(({ hits, totalHits }) => {
+  getImages = async (query, page) => {
+    this.setState({ isLoading: true });
+    await ImageService.getImages(page, query).then(({ hits, totalHits }) => {
       this.setState(prevState => ({
         images: [...prevState.images, ...hits],
         isVisible: this.state.page < Math.ceil(totalHits / 12),
       }));
     });
+    this.setState({ isLoading: false });
   };
 
   handleFormSubmit = text => {
+    if (text === '' || text === this.state.query) return;
     this.setState({ query: text, images: [], page: 1 });
   };
 
@@ -57,8 +60,15 @@ export class ImageGallery extends Component {
   };
 
   render() {
-    const { isVisible, showModal, images, query, largeImageURL, tags } =
-      this.state;
+    const {
+      isVisible,
+      showModal,
+      images,
+      query,
+      largeImageURL,
+      tags,
+      isLoading,
+    } = this.state;
 
     return (
       <>
@@ -69,17 +79,9 @@ export class ImageGallery extends Component {
             onClose={this.toggleModal}
           ></Modal>
         )}
-
+        {isLoading && <Loader />}
         <Searchbar onSubmit={this.handleFormSubmit} />
-        <Bars
-          height="80"
-          width="80"
-          color="#3f51b5"
-          ariaLabel="bars-loading"
-          wrapperStyle={{}}
-          wrapperClass=""
-          visible={true}
-        />
+
         {query.length > 0 && (
           <ul className={s.ImageGallery}>
             {images.map(({ id, webformatURL, tags, largeImageURL }) => (

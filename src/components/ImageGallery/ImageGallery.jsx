@@ -75,7 +75,7 @@ export class ImageGallery extends Component {
         {showModal && (
           <Modal
             largeImageURL={largeImageURL}
-            alt={tags}
+            tags={tags}
             onClose={this.toggleModal}
           ></Modal>
         )}

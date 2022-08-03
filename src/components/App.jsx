@@ -78,7 +78,7 @@ export class App extends Component {
             largeImageURL={largeImageURL}
             tags={tags}
             onClose={this.toggleModal}
-          ></Modal>
+          />
         )}
         {isLoading && <Loader />}
         <Searchbar onSubmit={this.handleFormSubmit} />
